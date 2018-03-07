@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'join' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>join</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'create' ">
+    <StartAction>Project</StartAction>
+    <StartArguments>create 1</StartArguments>
+  </PropertyGroup>
+</Project>
