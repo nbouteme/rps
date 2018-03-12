@@ -194,31 +194,19 @@ class RPSGame {
 			console.log(`There's ${this.players.length} other players left!`);
 			this.ppoints = [];
 			await this.doTurn();
-			this.players.map((p, idx) => [p, idx])
-				.filter(n => this.ppoints[n[1]] < 0)
-				.forEach(n => {
-					console.log(`Removing a player because of sub ${this.ppoints[n[1]]} points`);
-					this.ppoints.splice(n[1], 1);
-					this.players[n[1]].close();
-					this.players.splice(n[1], 1);
-				})
+			let zipped = this.players.map((p, idx) => [p, this.ppoints[idx]]);
+			let removed = zipped.filter(z => z[1] < 0);
+			let alive = zipped.filter(z => z[1] >= 0);
+			this.players = alive.map(z => z[0])
+			this.ppoints = alive.map(z => z[1])
+			removed.forEach(z => {
+					console.log(`Removing a player because of sub ${z[1]} points`);
+					z[0].close();
+			});
 			if (this.mypoints < 0) {
 				console.log("I lost to this");
 				break;
 			}
-			var endtasks = this.players.map(async p => {
-				let data = [0x43, 0x4F, 0x4E];
-				await p.write(data);
-				let res = await p.read(3);
-				return res.every((v, i) => v === data[i]);
-			});
-			// TODO: timeout here
-			await Promise.all(endtasks);
-			let results = endtasks.map(t => {
-				if (!t)
-					Console.WriteLine("Other player violated protocol");
-				return t;
-			});
 		}
 		if (this.players.length == 0)
 			console.log(`You won with ${this.mypoints} points!`);
@@ -231,10 +219,15 @@ class RPSGame {
 	async prepare() {
 		let playersips = [];
 		let hostcon = new pcli(this.host.address, this.host.port);
-		let serv = net.createServer(sock => this.players.push(new pcli(sock)));
+		await hostcon.connect();
+		let serv = net.createServer(sock => {
+			console.log("Player joined!");
+			this.players.push(new pcli(sock));
+		});
 		let port = await new Promise(res => {
 			serv.listen({port: 0}, async () => {
 				let nport = serv.address().port
+				console.log("Listening on port", nport);
 				nport = [nport & 0xFF, nport >> 8 & 0xFF];
 				res(nport);
 			});
@@ -254,7 +247,11 @@ class RPSGame {
 			playersips.push(pip);
 			++i;
 		}
-		this.players = playersips.map(ip => new pcli(ip.address, ip.port));
+		this.players = await Promise.all(playersips.map(async ip => {
+			let ret = new pcli(ip.address, ip.port);
+			await ret.connect();
+			return ret;
+		}));
 		while (true) {
 			let beg = await hostcon.read(1);
 			if (beg[0] == 0x4F) {
@@ -262,6 +259,10 @@ class RPSGame {
 				console.log(res);
 				if (res[0] == 0x4B) {
 					console.log(`Starting game with ${res[1]} other players`);
+					while (this.players.length + 1 != res[1]) {
+						console.log("Waiting missing players...");
+						await delay(1000);
+					}
 					hostcon.close();
 					serv.close();
 					break;

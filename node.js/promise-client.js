@@ -6,11 +6,15 @@ class PromiseClient {
 
 	constructor(addr, port) {
 		this.cache = [];
+		this.connected = false;
 		if (port == undefined) {
 			this.client = addr;
+			this.connected = true;
 		} else {
 			this.client = new net.Socket();
-			this.client.connect(port, addr);
+			console.log('Connecting to ', addr, port);
+			this.port = port;
+			this.addr = addr;
 		}
 		this.readPromises = [];
 		let sendData = data => {
@@ -22,6 +26,14 @@ class PromiseClient {
 		};
 		this.client.on('data', sendData);
 	}
+
+
+	connect() {
+		if (this.connected)
+			return;
+		return new Promise(res => this.client.connect(this.port, this.addr, res));
+	}
+
 
 	write(data) {
 		return new Promise(res => this.client.write(Buffer.from(data), res));

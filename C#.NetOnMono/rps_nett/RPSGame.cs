@@ -224,15 +224,16 @@ namespace rps_nett {
                 Console.WriteLine("There's {0:d} other players left!", players.Count);
                 playersPoints = new List<int>();
                 DoTurn();
-                players.
-                       Select((player, idx) => new { player, idx }).
-                       Where(t => playersPoints[t.idx] < 0).ToList().
-                       ForEach(t => {
-                           Console.WriteLine("Removing a player because of sub {0:d} points", playersPoints[t.idx]);
-                           playersPoints.RemoveAt(t.idx);
-                           players[t.idx].Close();
-                           players.RemoveAt(t.idx);
-                       });
+
+                var zipped = players.Zip(playersPoints, (TcpClient other, int points) => new { other, points });
+                var removed = zipped.Where(z => z.points < 0);
+                var alive = zipped.Where(z => z.points >= 0);
+                players = alive.Select(z => z.other).ToList();
+                playersPoints = alive.Select(z => z.points).ToList();
+
+                foreach (var z in removed) {
+                    z.other.Close();
+                }
                 if (myPoints < 0) {
                     Console.WriteLine("I lost to this");
                     break;
