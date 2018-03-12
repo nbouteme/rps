@@ -1,5 +1,6 @@
 %include "event_loop.inc"
 %include "host.inc"
+%include "syscalls.inc"
 
 segment .bss
 el: resb event_loop.size
@@ -24,3 +25,6 @@ _start:
 	call add_source
 	mov rdi, el
 	call run_event_loop
+	mov rax, EXIT
+	mov rdi, 0
+	syscall
