@@ -5,6 +5,8 @@
 %include "host.inc"
 %include "syscalls.inc"
 
+extern memcpy
+
 global init_event_loop
 init_event_loop:
 	ret
@@ -78,36 +80,40 @@ global run_event_loop
 run_event_loop:
 	mov dword [rdi + event_loop.running], 1
 .loop:
-	cmp [rdi + event_loop.nsources], 0
-	je end
+	cmp dword [rdi + event_loop.nsources], 0
+	je .end
 
 	push rdi
 
 	mov rax, POLL
-	mov rdi, rdi + event_loop.fds
+	add rdi, event_loop.fds
 	mov rsi, [rdi + event_loop.nsources]
 	mov rdx, -1
 	syscall
 
 	pop rdi
 
-	mov rcx, rdi + event_loop.current
+	mov rcx, rdi
+	add rcx, event_loop.current
 	mov dword [rcx], 0
 
 .source_iter_loop:
 	cmp rax, 0
-	je esil
-	cmp qword [rcx], [rdi + event_loop.nsources]
-	jge esil
+	je .esil
+	mov r8, rdi
+	mov r8, [r8 + event_loop.nsources]
+	cmp qword [rcx], r8
+	jge .esil
 
 	mov r8, [rdi + event_loop.fds]
 	add r8, [rcx]
 	cmp word [r8 + pollfd.revents], 0
-	je not_found
+	je .not_found
 
 	mov r9, [rdi + event_loop.sources]
 	add r9, [rcx]
-	mov qword [r9 + source.pfd], [r8]
+	mov r8, [r8]
+	mov qword [r9 + source.pfd], r8
 
 	push rdi
 	push rcx
@@ -115,7 +121,7 @@ run_event_loop:
 
 	mov rdi, [r9]
 	mov r8, [rdi + source.receive]
-	call *r8
+	call r8
 
 	pop rax
 	pop rcx
