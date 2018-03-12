@@ -13,8 +13,16 @@ init_event_loop:
 
 global add_source
 add_source:
-	mov [rdi + event_loop.sources + event_loop.nsources], rsi
-	mov [rdi + event_loop.fds + event_loop.nsources], rsi
+	mov rax, rdi
+	add rax, event_loop.sources
+	mov r8, [rdi + event_loop.nsources]
+	sal r8, 3
+	add rax, r8
+	mov [rax], rsi
+	add rax, event_loop.fds
+	add rsi, source.pfd
+	mov rsi, [rsi]
+	mov [rax], rsi
 	mov rax, [rdi + event_loop.nsources]
 	add rax, 1
 	mov [rdi + event_loop.nsources], rax
@@ -83,15 +91,12 @@ run_event_loop:
 	cmp dword [rdi + event_loop.nsources], 0
 	je .end
 
-	push rdi
-
 	mov rax, POLL
-	add rdi, event_loop.fds
 	mov rsi, [rdi + event_loop.nsources]
+	add rdi, event_loop.fds
 	mov rdx, -1
 	syscall
-
-	pop rdi
+	sub rdi, event_loop.fds
 
 	mov rcx, rdi
 	add rcx, event_loop.current
