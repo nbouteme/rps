@@ -15,7 +15,4 @@ struc host_udp_emitter
 .size:
 endstruc
 
-extern init_host_udp_emitter
-extern init_host_tcp_server
-
 %endif

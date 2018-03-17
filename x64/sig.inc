@@ -1,6 +1,6 @@
 %ifndef sig__
 %define sig__
 
-global alarm_mask
+extern alarm_mask
 
 %endif

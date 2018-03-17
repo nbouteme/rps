@@ -17,11 +17,4 @@ struc event_loop
 .size:
 endstruc
 
-%ifndef NOEXPORT
-extern init_event_loop
-extern add_source
-extern remove_source
-extern run_event_loop
-%endif
-
 %endif

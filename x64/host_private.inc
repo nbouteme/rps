@@ -7,6 +7,7 @@ struc addr_inet4
 .family: resw 1
 .port: resw 1
 .addr: resd 1
+.pad: resb 8
 .size:
 endstruc
 
@@ -20,7 +21,7 @@ endstruc
 struc host_tcp_private
 .el: resq 1
 .sock: resd 1
-.allocated: resd 1
+.allocated: resb 1
 .left: resb 1
 .places: resb 256 * tcp_client.size							; haha lol
 .size:

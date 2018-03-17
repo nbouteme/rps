@@ -1,54 +1,85 @@
-%include "event_loop.inc"
-%include "host.inc"
+%include "event_loop_syms.inc"
+%include "host_syms.inc"
 %include "syscalls.inc"
-
-segment .text
-extern accept_tcp
-extern udp_receive
+%include "sig.inc"
 
 segment .data
-extern host_tcp_pdata
-extern host_udp_pdata
-
-tcp_server_str: db 'Host TCP Server', 0
-udp_emitter_str: db 'Host UDP Emitter', 0
-
-hts:
-istruc host_tcp_server
-	at host_tcp_server.base, istruc source
-								 at source.name, dq tcp_server_str
-								 at source.pfd, istruc pollfd
-													at pollfd.events, dw POLLIN
-												iend
-								 at source.receive, dq accept_tcp
-							 iend
-	at host_tcp_server.priv, dq host_tcp_pdata
-iend
-
-hue:
-istruc host_udp_emitter
-	at host_udp_emitter.base, istruc source
-								  at source.name, dq udp_emitter_str
-								  at source.pfd, istruc pollfd
-													 at pollfd.events, dw POLLIN
-												 iend
-								  at source.receive, dq udp_receive
-							  iend
-	at host_tcp_server.priv, dq host_udp_pdata
-iend
+extern hue
+extern hts
 
 segment .bss
-
+global el
+align 16
 el: resb event_loop.size
 
 segment .text
 
 extern init_host_tcp_server
 extern init_host_udp_emitter
+extern strcmp
+
+align 16
+createstr: db 'create', 0
+joinstr: db 'join', 0
+
+align 16
+ustr: db 'Usage: ./rpsm create [2-9] | join', 10
+ustrsz equ $-ustr
+align 16
+usage_and_die:
+	mov rax, WRITE
+	mov rdi, 2
+	mov rsi, ustr
+	mov rdx, ustrsz
+	syscall
+	mov rax, EXIT
+	syscall
 
 global _start
+align 16
 _start:
-	mov rdi, hts
+	pop rbp						; argc
+	cmp rbp, 1
+	jne .cont
+	call usage_and_die
+.cont:
+	pop rax						; argv[0]
+	pop rax						; argv[1]
+
+	mov rdi, rax
+	mov rsi, createstr
+	call strcmp
+	cmp rax, 0
+	je .server
+
+	mov rsi, joinstr
+	call strcmp
+	cmp rax, 0
+	je .client
+.client:
+	call usage_and_die
+
+.server:
+	cmp rbp, 3
+	je .valid
+	call usage_and_die
+.valid:
+	mov rax, SIGPROCMASK
+	mov rdi, SIG_BLOCK
+	mov rsi, alarm_mask
+	mov rdx, 0
+	mov r10, 8
+	syscall
+
+	pop rdi
+	mov dil, [rdi]
+	sub dil, 0x30
+.cmp:
+	cmp dil, 9
+	jg usage_and_die
+	cmp dil, 2
+	jl usage_and_die
+
 	call init_host_tcp_server
 	mov rdi, hue
 	call init_host_udp_emitter

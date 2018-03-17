@@ -1,4 +1,4 @@
-SRC = event_loop.s hash_data.s main.s sig.s undef.s
+SRC = event_loop.s hash_data.s host.s main.s sig.s undef.s utils.s
 OBJ = $(SRC:.s=.o)
 NAME = rpsm
 

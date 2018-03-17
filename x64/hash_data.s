@@ -23,6 +23,7 @@
 %endmacro
 
 global ahash_data
+align 16
 ahash_data:
 .init:
 	push r12

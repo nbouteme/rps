@@ -6,6 +6,9 @@
 %define OPEN		  2
 %define CLOSE		  3
 %define POLL		  7
+
+;rdi: how	rsi: sigset_t * rdx: sigset_t *oset	r10: size_t sigsetsize
+%define SIGPROCMASK	 14
 %define IOCTL		 16
 %define ALARM		 37
 %define GETPID		 39
@@ -30,5 +33,21 @@
 %define POLLERR		0x0008
 %define POLLHUP		0x0010
 %define POLLNVAL	0x0020
+
+%define AF_INET		2
+
+%define SOCK_STREAM 1
+%define SOCK_DGRAM  2
+
+%define SOL_SOCKET  1
+
+%define SO_REUSEADDR 2
+%define SO_BROADCAST 6
+%define SO_REUSEPORT 15
+
+%define UDP_PORT 0xAE1E
+%define TCP_PORT 0xAD1E
+
+%define SIG_BLOCK 0
 
 %endif
