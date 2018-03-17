@@ -13,6 +13,12 @@ spécifier de configuration tel que l'ip/port de quiquonque.
 Historique
 ----------
 
+## Version 0.5
+- Retire dans 1.2 le message  de cloture. La seule possibilité devient
+  une fermeture de connexion
+- Retire dans 2.5 le message pour  continuer la partie avec les autres
+  joueurs
+
 ## Version 0.4
 - Retire  le  message   de  requête  de  création  de   port  dans  la
   communication hote -> client. Jugé non nécessaire car le client peut
@@ -66,10 +72,8 @@ Client - Synonyme de joueur.
 
 2 - Il écoute en même temps  sur le port TCP 7853 pour des connections
 	entrantes.  Lors  d'une connection entrante,  si il n'y a  plus de
-	place dans la partie, le client  est refusé avec le message [0x4E,
-	0x4F, 0x50,  0x45] (NOPE) et la  connexion est fermée, ou  bien la
-	connection  est  immediatement  fermée.   Ce  port  ne  sera  plus
-	accessible après le début de la partie.
+	place dans la partie, la  connection est immediatement fermée.  Ce
+	port ne sera plus accessible après le début de la partie.
 
 3 - Sinon  la connexion est maintenue, le client  envoie au serveur le
 	numéro de son  port d'écoute sur deux octets  Little  Endian et un
@@ -140,11 +144,10 @@ Client - Synonyme de joueur.
 	d'autre choix qu'elle bat] - [le nombre de choix qui la batte].
 
 4 -  Si cette valeur  est strictement  négative, P ferme  la connexion
-	 avec tout les autres joueurs puis.
+	 avec tout les autres joueurs puis fini.
 
-5 - Si cette valeur est positive ou nulle, P envoie [0x43, 0x4F, 0x4E]
-	à tout  les autres  joueurs qui  ont un score  positif ou  nul, et
-	s'attend à lire la meme chose en réponse.
+5 - Si cette valeur est positive  ou nulle, P continue le jeu avec les
+	autres joueurs ayant obtenu un score positif ou nul.
 
 3 - Fin
 -------
