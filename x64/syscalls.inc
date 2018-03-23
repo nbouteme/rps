@@ -7,7 +7,9 @@
 %define CLOSE		  3
 %define POLL		  7
 
-;rdi: how	rsi: sigset_t * rdx: sigset_t *oset	r10: size_t sigsetsize
+; noté ici parce que l'utilisation de l'appel système est différent
+; des parametres de la glibc
+; rdi: how	rsi: sigset_t * rdx: sigset_t *oset	r10: size_t sigsetsize
 %define SIGPROCMASK	 14
 %define IOCTL		 16
 %define ALARM		 37
@@ -49,5 +51,7 @@
 %define TCP_PORT 0xAD1E
 
 %define SIG_BLOCK 0
+
+%define SIGALRM 14
 
 %endif

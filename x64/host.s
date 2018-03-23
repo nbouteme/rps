@@ -1,31 +1,21 @@
-segment .data
-
 %include "event_loop_syms.inc"
 %include "host_private.inc"
 %include "syscalls.inc"
 %include "sig.inc"
 
+segment .data
+
 extern el
 
+segment .bss
 global host_tcp_pdata
-align 16
-host_tcp_pdata:
-istruc host_tcp_private
-at host_tcp_private.el,        dq el
-at host_tcp_private.sock,      dd -1
-at host_tcp_private.allocated, db 0
-at host_tcp_private.left, db 3
-iend
-
 global host_udp_pdata
-align 16
-host_udp_pdata:
-istruc host_udp_private
-at host_udp_private.el,   dq el
-at host_udp_private.serv, dq host_tcp_pdata
-at host_udp_private.sock, dd -1
-iend
 
+align 16
+host_tcp_pdata: resb host_tcp_private.size
+host_udp_pdata: resb host_udp_private.size
+
+segment .data
 align 16
 tcp_server_str: db 'Host TCP Server', 0
 
@@ -60,10 +50,13 @@ at host_tcp_server.priv, dq host_udp_pdata
 iend
 
 align 16
+global one
 one: dw 1
+global four
 four: dw $-one
 
 align 16
+global sizeofin4
 sizeofin4: dd addr_inet4.size
 
 align 16
@@ -75,6 +68,7 @@ at addr_inet4.addr, dd -1
 iend
 
 align 16
+global tcpaddr
 tcpaddr:
 istruc addr_inet4
 at addr_inet4.family, dw AF_INET
