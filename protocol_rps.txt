@@ -1,14 +1,18 @@
-Le protocole de jeu Pierre Papier Ciseaux.
+Les protocoles de jeu Pierre Papier Ciseaux.
+
+Le  jeu est  défini en  deux protocoles,  un protocole  de découverte,
+décrit dans la  partie 1, et un protocole d'échange,  décrit dans 2 et
+3.
 
 Le  protocole est  concu pour  empêcher la  triche s'appuyant  sur les
-délais  de communication  en réseau.  Le jeu  ne s'appuie  pas sur  un
-serveur  qui sert  de  tiers  de confiance,  seulement  d'un hote  qui
-s'assure  de mettre  tout les  joueurs en  relation les  uns avec  les
-autres. L'hote peut très bien être un joueur ou non.
+délais de  communication en  réseau.  Le  jeu ne  s'appuie pas  sur un
+serveur  qui sert  de tiers  de confiance,  mis à  par pour  la partie
+découverte.
 
-Le protocole  se base  aussi sur  le mécanisme  de broadcast  UDP pour
-solliciter au  minimum possible un  joueur, donc sans avoir  besoin de
-spécifier de configuration tel que l'ip/port de quiquonque.
+Le protocole de découverte se base aussi sur le mécanisme de broadcast
+UDP pour  solliciter au  minimum possible un  joueur, donc  sans avoir
+besoin de spécifier  de configuration tel que  l'ip/port de quiquonque
+lors d'une partie sur un réseau local.
 
 Historique
 ----------
@@ -66,7 +70,7 @@ Client - Synonyme de joueur.
 1 - Initialisation
 ------------------
 
-1 - Un  joueur broadcast  sur le réseau  à intervalle régulier  sur le
+1 - Un serveur broadcast  sur le réseau  à intervalle régulier  sur le
 	port UDP  7854 un  message de découverte.   [0x44, 0x49,  0x53, x]
 	(DIS), où x est le nombre de places restantes codé sur un octets.
 
