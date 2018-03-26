@@ -1,8 +1,15 @@
 %include "event_loop.inc"
 %include "host.inc"
 %include "syscalls.inc"
+%include "utils.inc"
 
-extern memcpy
+segment .bss
+global el
+
+align 16
+el: resb event_loop.size
+
+segment .text
 
 global init_event_loop
 align 16
@@ -14,7 +21,8 @@ align 16
 add_source:
 	mov rax, rdi
 	add rax, event_loop.sources
-	mov r8, [rdi + event_loop.nsources]
+	mov r8, 0
+	mov r8d, dword [rdi + event_loop.nsources]
 	sal r8, 3
 	add rax, r8
 	mov [rax], rsi
@@ -32,7 +40,7 @@ align 16
 remove_source:
 	mov r12, 0
 .loop:
-	cmp r12, [rdi + event_loop.nsources]
+	cmp r12d, dword [rdi + event_loop.nsources]
 	je .end
 
 	shl r12, 3
@@ -46,7 +54,7 @@ remove_source:
 	mov rsi, rdi
 	add rsi, 8
 
-	mov edx, dword [rdi + event_loop.nsources]
+	mov edx, dword [r8 + event_loop.nsources]
 	shl rdx, 3
 	sub rdx, r12
 	sub rdx, 8

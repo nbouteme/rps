@@ -3,10 +3,11 @@
 %include "event_loop_syms.inc"
 %include "syscalls.inc"
 %include "rps_syms.inc"
+%include "utils.inc"
 
 extern el
 
-segment .text
+segment .data
 global cts
 align 16
 cts:
@@ -35,8 +36,13 @@ align 16
 ctsfailstr: db 'Host connection: Something unexpected happened\n', 0
 ctsfailsz equ $ - ctsfailstr
 
+aplayer: db 'A player has connected', 10, 0
+raising: db 'Raising alarm (tcp)', 10, 0
+
 align 16
 accept_player:
+	mov rdi, aplayer
+	call puts
 	xor rax, rax
 	mov ax, [cts + client_tcp_server.base + source.pfd + pollfd.revents]
 	and ax, POLLHUP | POLLERR
@@ -57,8 +63,7 @@ accept_player:
 	mov rsi, 0
 	mov rdx, 0
 	syscall
-	mov rsi, rax
-	mov rdi, rps
+	mov rdi, rax
 	call rps_add_player
 	mov al, [rps + rps_game.ready]
 	cmp al, 0
@@ -79,12 +84,20 @@ accept_player:
 	call rps_add_player
 	jmp .loop
 .start_game:
+	mov rdi, raising
+	call puts
+	mov rax, GETPID
+	syscall
 	mov rdi, rax
 	mov rax, KILL
 	mov rsi, SIGALRM
 	syscall
 	mov rdi, el
 	mov rsi, cts
+	call remove_source
+	mov rax, CLOSE
+	mov edi, [ctp + client_tcp_private.sock]
+	syscall
 .end:
 	ret
 
@@ -95,6 +108,7 @@ init_tcp_server:
 	mov rdi, AF_INET
 	mov rsi, SOCK_STREAM
 	mov rdx, 0
+	mov word [tcpaddr + addr_inet4.port], dx
 	syscall
 	mov rdi, rax
 	mov rax, BIND
@@ -104,5 +118,17 @@ init_tcp_server:
 	mov rax, LISTEN
 	mov rsi, 8
 	syscall
+	sub rsp, addr_inet4.size + 2
+	mov rax, GETSOCKNAME
+	lea rsi, [rsp + 2]
+	mov word [rsp], addr_inet4.size
+	lea rdx, [rsp]
+	syscall
+	mov ax, word [rsp + 2 + addr_inet4.port]
+	xchg al, ah
+	mov word [listen_port], ax
+	add rsp, addr_inet4.size + 2
+
 	mov dword [ctp + client_tcp_private.sock], edi
+	mov dword [cts + client_tcp_server.base + source.pfd + pollfd.fd], edi
 	ret

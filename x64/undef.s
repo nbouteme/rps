@@ -1,4 +1,0 @@
-global atoi
-atoi:
-
-	ret

@@ -1,22 +1,28 @@
 %include "syscalls.inc"
 
 global memcpy
+global kmmemcpy
 align 16
+kmmemcpy:
 memcpy:
+	push r10
 	mov rax, 0
 .loop:
 	cmp rax, rdx
 	je .end
-	mov r10, [rsi + rax]
-	mov [rdi + rax], r10
+	mov r10b, byte [rsi + rax]
+	mov byte [rdi + rax], r10b
 	add rax, 1
 	jmp .loop
 .end:
+	pop r10
 	ret
 
 global strcmp
 align 16
 strcmp:
+	push r10
+	push r11
 	mov rax, 0
 	mov r10, 0
 	mov r11, 0
@@ -34,12 +40,15 @@ strcmp:
 .end:
 	mov rax, r10
 	sub rax, r11
+	pop r11
+	pop r10
 	ret
 
 global atoi
 align 16
 atoi:
 	mov rax, 0
+	push r11
 	mov r11, 0
 	mov rcx, 0
 .loop:
@@ -54,6 +63,7 @@ atoi:
 	add r11, 1
 	jmp .loop
 .end:
+	pop r11
 	ret
 
 global revstr
@@ -87,6 +97,7 @@ global utoa
 align 16
 utoa:
 	mov rcx, 0
+	push r11
 	mov r11, rdi
 .loop:
 	mov rdi, r11
@@ -103,13 +114,14 @@ utoa:
 	mov byte [rsi + rcx], 0
 	mov rdi, rsi
 	call revstr
+	pop r11
 	ret
 
 global putunbr
 align 16
 putunbr:
-	lea rsi, [rsp - 16]
 	sub rsp, 16
+	mov rsi, rsp
 	call utoa
 	add rsp, 16
 	mov rsi, rax
@@ -122,7 +134,46 @@ putunbr:
 	add rdx, 1
 	jmp .loop
 .endsz:
-	mov rax, 1
+	mov rax, WRITE
 	mov rdi, 1
 	syscall
+	ret
+
+global strlen
+strlen:
+	mov rax, 0
+.loop:
+	cmp byte [rdi + rax], 0
+	je .end
+	add rax, 1
+	jmp .loop
+.end:
+	ret
+
+global puts
+puts:
+	mov r8, rdi
+	call strlen
+	mov rdx, rax
+	mov rax, WRITE
+	mov rsi, r8
+	mov rdi, 1
+	syscall
+	mov rdi, rsi
+	ret
+
+global memcmp
+memcmp:
+	mov rcx, 0
+	mov rax, 0
+.loop:
+	cmp rcx, rdx
+	jge .end
+	mov al, [rdi + rcx]
+	sub al, [rsi + rcx]
+	cmp al, 0
+	jne .end
+	add rcx, 1
+	jmp .loop
+.end:
 	ret

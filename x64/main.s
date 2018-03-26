@@ -17,12 +17,6 @@ segment .data
 extern hue
 extern hts
 
-segment .bss
-global el
-
-align 16
-el: resb event_loop.size
-
 segment .text
 
 extern init_host_tcp_server

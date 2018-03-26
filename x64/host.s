@@ -51,9 +51,9 @@ iend
 
 align 16
 global one
-one: dw 1
+one: dd 1
 global four
-four: dw $-one
+four: dd $-one
 
 align 16
 global sizeofin4
@@ -125,7 +125,7 @@ align 16
 udpfailstr: db 'UDP Emitter: Something unexpected happened\n', 0
 udpfailsz equ $ - udpfailstr
 align 16
-tcpfailstr: db 'UDP Emitter: Something unexpected happened\n', 0
+tcpfailstr: db 'TCP Listener: Something unexpected happened\n', 0
 tcpfailsz equ $ - tcpfailstr
 
 global udp_receive
