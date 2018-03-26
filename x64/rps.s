@@ -384,10 +384,6 @@ rps_finish:
 	call remove_source
 	ret
 
-;extern remove_player
-global rps_finish
-global do_turn
-
 align 16
 rps_play:
 	mov al, [rps + rps_game.nplayers]
