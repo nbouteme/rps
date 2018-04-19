@@ -1,5 +1,5 @@
 Fonctionnement
-==============
+==================
 
 Le projet dépend sur NASM.
 Pour assembler, `make` suffit, l'éxecutable de sortie est `rpsm`
@@ -35,9 +35,9 @@ logique  de  jeu  elle  même,  qui attends  qu'une  des  deux  sources
 précédentes émettent le  signal SIGALRM sur le  processus courant pour
 commencer à s'éxecuter, implémenté dans `rps.s`.
 
-Quand l'écouteur UDP trouve un serveur, il crée une nouvelle source
-basée sur le fd de la socket de connection client/serveur (son code
-est aussi dans `client_udp.s`) et se supprime lui même de la boucle
+Quand l'écouteur  UDP trouve un  serveur, il crée une  nouvelle source
+basée sur  le fd de la  socket de connection client/serveur  (son code
+est aussi  dans `client_udp.s`) et se  supprime lui même de  la boucle
 d'évènement.
 
 Coté serveur,  on commence avec  deux sources, et aucune  source n'est
@@ -45,7 +45,6 @@ nécessaire par la suite.  Il y  a l'émetteur de paquets UDP broadcast,
 qui est basé  sur l'émission d'un signal SIGALRM  toutes les secondes.
 Et il y a l'écouteur TCP,  qui attend évidemment une connection sur sa
 socket. les deux sont implémentés dans `host.s`
-
 
 Au niveau des autres fichiers non mentionnés jusqu'ici:
 - `hash_data.s`, la fonction de hashage définie dans le protocole.
@@ -55,3 +54,11 @@ Au niveau des autres fichiers non mentionnés jusqu'ici:
 - `sig.s`, définition d'un sigset_t représentant le signal SIGALRM
 - `utils.s`, des fonctions utilitaires standard en C, (memcpy, memcmp,
    strcmp, utoa, puts, atoi...)
+   
+   
+Limitations
+==============
+
+Le programme ne  gère pas les possible  déconnexions imtempestives, et
+il  y a  une possibilité  de comportements  étranges à  partir de  126
+joueurs.

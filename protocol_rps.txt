@@ -1,47 +1,52 @@
 Les protocoles de jeu Pierre Papier Ciseaux.
 
-Le  jeu est  défini en  deux protocoles,  un protocole  de découverte,
-décrit dans la  partie 1, et un protocole d'échange,  décrit dans 2 et
+Le jeu  est défini en  deux protocoles  : un protocole  de découverte,
+décrit dans la partie 1 ; et  un protocole d'échange, décrit dans 2 et
 3.
 
-Le  protocole est  concu pour  empêcher la  triche s'appuyant  sur les
+Le  protocole est  conçu pour  empêcher la  triche s'appuyant  sur les
 délais de  communication en  réseau.  Le  jeu ne  s'appuie pas  sur un
-serveur  qui sert  de tiers  de confiance,  mis à  par pour  la partie
+serveur  qui sert  de tiers  de confiance,  mis à  part pour la partie
 découverte.
 
 Le protocole de découverte se base aussi sur le mécanisme de broadcast
 UDP pour  solliciter au  minimum possible un  joueur, donc  sans avoir
-besoin de spécifier  de configuration tel que  l'ip/port de quiquonque
+besoin de spécifier de configuration telles que l'ip/port de quiconque
 lors d'une partie sur un réseau local.
 
 Historique
 ----------
 
+## Version 0.6
+- Retire dans 2.1  la nécessité d'accomplir chaque tour en  moins de 5
+  secondes,  et  l'exclusion  des  retardataires  ;  contrainte  jugée
+  pertinente, mais relevant d'avantage d'un choix d'implémentation.
+
 ## Version 0.5
-- Retire dans 1.2 le message  de cloture. La seule possibilité devient
+- Retire dans 1.2 le message  de clôture. La seule possibilité devient
   une fermeture de connexion
 - Retire dans 2.5 le message pour  continuer la partie avec les autres
   joueurs
 
 ## Version 0.4
 - Retire  le  message   de  requête  de  création  de   port  dans  la
-  communication hote -> client. Jugé non nécessaire car le client peut
+  communication hôte -> client. Jugé non nécessaire car le client peut
   écouter sur un seul port et toujours répondre avec le même numéro de
-  port.  Maintenant,  à l'initialisation de la  connexion avec l'hote,
+  port.  Maintenant,  à l'initialisation de la  connexion avec l'hôte,
   le client envoie le numéro de son port d'écoute
 
 ## Version 0.3
-- Retire la nécessité d'envoyer un message de cloture dans 2.4
-- Précise  que  l'hote  peut  aussi être  conceptuellement  un  joueur
-  prêt. dans 1.3
-- Explicite l'arret de l'écoute sur le port TCP 7853 dans 1.5
-- Explicite la fermeture  de la connection entre l'hote  et un nouveau
+- Retire la nécessité d'envoyer un message de clôture dans 2.4
+- Précise  que  l'hôte  peut  aussi être  conceptuellement  un  joueur
+  prêt dans 1.3
+- Explicite l'arrêt de l'écoute sur le port TCP 7853 dans 1.5
+- Explicite la fermeture  de la connexion entre l'hôte  et un nouveau
   client dans 1.3
 - Ajout de définitions de termes
 
 ## Version 0.2
 - Ajout dans le paragraphe 1.3 du cas dans lequel un nouveau joueur
-  initie une connection avec les joueurs établi
+  initie une connexion avec les joueurs établis
 
 ## Version 0.1
 - Correction des types de l'exemple d'implémentation de la fonction
@@ -52,52 +57,52 @@ Historique
 
 Hôte - Fait référence  à un processus qui écoute sur  le port TCP 7853
 	   et  émet  des packets  UDP  broadcast  sur  le port  7854.   Le
-	   processus de l'hote peut aussi contenir un joueur mais les deux
-	   sont disjoins.  La notion d'hôte n'est plus pertinante après le
+	   processus de l'hôte peut aussi contenir un joueur mais les deux
+	   sont disjoins.  La notion d'hôte n'est plus pertinente après le
 	   chapitre 2.
 
 Joueur  - Une  machine  participante  au jeu.   Un  joueur initie  une
-		  connection vers toute les machines  qui ont été prêtes avant
-		  lui  et attends  une connection  des joueurs  qui rejoignent
-		  après lui.
+		  connexion vers toute  les machines qui ont  été prêtes avant
+		  lui et attends  une connexion des joueurs  qui rejoignent le
+		  jeu après lui.
 
 Client - Synonyme de joueur.
 
-[...]   - Une  suite de  valeurs  correspondantes à  un message  d'une
-		  taille  égale à  la somme  des membres  de la  suite.  Chaque
-		  message doit être contenu dans un seul datagramme.
+[...] - Une suite de valeurs  correspondant à un message d'une taille
+	  	égale à  la somme des  membres de la suite.   Chaque message
+		doit être contenu dans un seul datagramme.
 
 1 - Initialisation
 ------------------
 
 1 - Un serveur broadcast  sur le réseau  à intervalle régulier  sur le
 	port UDP  7854 un  message de découverte.   [0x44, 0x49,  0x53, x]
-	(DIS), où x est le nombre de places restantes codé sur un octets.
+	(DIS), où x est le nombre de places restantes codée sur un octet.
 
-2 - Il écoute en même temps  sur le port TCP 7853 pour des connections
-	entrantes.  Lors  d'une connection entrante,  si il n'y a  plus de
-	place dans la partie, la  connection est immediatement fermée.  Ce
+2 - Il écoute en même temps  sur le port TCP 7853 pour des connexions
+	entrantes.  Lors  d'une connexion entrante,  si il n'y a  plus de
+	place dans la partie, la  connexion est immédiatement fermée.  Ce
 	port ne sera plus accessible après le début de la partie.
 
 3 - Sinon  la connexion est maintenue, le client  envoie au serveur le
-	numéro de son  port d'écoute sur deux octets  Little  Endian et un
-	message [0x43,  x] est envoyé par  l'hote au nouveau client,  où x
-	correspond au  nombre de joueur  ayant joint la partie  (donc sans
-	compter  l'hote sauf  si l'hote  est un  joueur).  Chacune  de ces
-	messages d'initialisation  permettent de constituer un  tuple [ip,
-	port] de 6 octets,  avec l'ip et leur port d'écoute  , et ce tuple
-	est envoyé au  nouveau client par l'hote.  Le  nouveau client doit
-	s'attendre à recevoir exactement x tuples.  Apres avoir recu les x
-	tuples, le nouveau  client doit initier une connection  vers les x
-	autre joueurs puis  est considéré comme pret.  À partir  de là, il
-	n'initiera plus de connection.
+	numéro de  son port d'écoute sur  deux octets Little Endian  et un
+	message [0x43,  x] est envoyé par  l'hôte au nouveau client,  où x
+	correspond au nombre  de joueurs ayant joint la  partie (donc sans
+	compter  l'hôte sauf  si l'hôte  est  un joueur).   Chacun de  ces
+	messages d'initialisation permet de constituer un tuple [ip, port]
+	de 6  octets, avec  l'ip et  leur port d'écoute,  et ce  tuple est
+	envoyé  au nouveau  client  par l'hôte.   Le  nouveau client  doit
+	s'attendre à recevoir exactement x tuples.  Apres avoir reçu les x
+	tuples, le  nouveau client doit  initier une connexion vers  les x
+	autres joueurs, puis est considéré comme  prêt. À partir de là, il
+	n'initiera plus de connexion.
 
 4 - Dans le  cas où plus d'un nouveau client  tentent de se connecter,
-	l'hote  doit   les  traiter   entièrement  dans   l'ordre  jusqu'à
-	l'acceptation, et vérifier si il  reste assez de place, et refuser
-	la connexion au suivant le cas échéant.
+	l'hôte  doit   les  traiter   entièrement  dans   l'ordre  jusqu'à
+	l'acceptation, vérifier si il reste  assez de place, et refuser la
+	connexion aux suivants le cas échéant.
 
-5 - Lorsque le nombre de  places atteint 0, l'hote cesse d'émettre des
+5 - Lorsque le nombre de  places atteint 0, l'hôte cesse d'émettre des
 	paquets  UDP, et  envoie le  message [0x4F,  0x4B, x]  à tout  les
 	autres joueurs, et où x est le  nombre de joueurs de la partie, et
 	arrête d'écouter sur le port 7853.
@@ -109,46 +114,39 @@ Client - Synonyme de joueur.
 
 1 - Si il reste plus de 1 joueurs, le jeu continue, sinon finir.
 
-2 - Le tour doit se jouer en moins de 5 secondes.
-
-3 - Chaque joueur  P hache son choix avec un choix  0x00, 0x01 ou 0x02
+2 - Chaque joueur  P hache son choix 0x00, 0x01 ou 0x02
 	(pierre, papier, ciseau)  avec pour sel une  séquence aléatoire de
 	248 bits (31 octets aléatoires).
 
-4 -  Chaque joueur P  envoie à tout les  autres joueurs J,  le message
+3 -  Chaque joueur P  envoie à tous les  autres joueurs J,  le message
 	 [0x4B] suivit du hash de 32 octets.
 
-5 -  Chaque joueur  P recoivent  donc de  la part  de tout  les autres
-	 joueurs J le hash du choix de ses derniers.
+4 -  Chaque joueur  P reçoivent  donc de  la part,  de tout  les autres
+	 joueurs J, le hash du choix de ses derniers.
 
-6 - Apres 5 secondes, les joueurs J qui n'ont pas répondu à temps sont
-	considéré hors jeu,  la connexion avec eux doit être  fermée et le
-	joueur considéré  comme aillant  réalisé un  choix perdant.   À ce
-	moment  la, la  représentation de  la partie  du point  de vue  du
-	joueur  P n'est  plus  garantie  d'être exacte  vis  à  vis de  la
-	réalité.  Si la connection entre P et un joueur S de J est fermée,
+5 - 	 Si la connexion entre P et un joueur S de J est fermée,
 	P peut assumer que S est hors jeu.
 
 ## 2 - Vérification
 
-1 - Chaque joueur P envoie à  tout les autres joueurs J, le message de
+1 - Chaque joueur P envoie à  tous les autres joueurs J, le message de
 	33 octets [0x56, x,  s], où x est le choix (0, 1,  ou 2), et s est
 	le sel de 31 octets que P a utilisé à l'étape "Choix".
 
 2 - Chaque joueur P calcule H(x +  s), et le compare au hash obtenu de
 	l'étape "Choix" du joueur J
 
-	Si le hash ne correspond pas,  le joueur J est considéré hors jeu,
-	et  la connexion  doit être  fermée et  le joueur  considéré comme
+	Si le hash ne correspond pas,  le joueur J est considéré hors jeu ;
+	la connexion  doit être  fermée et  le joueur  considéré comme
 	aillant réalisé un choix perdant.
 
 	Si le hash correspond, le choix est considéré valide.
 
 3 - Pour un joueur P, son choix  Cp a une valeur V qui vaut [le nombre
-	d'autre choix qu'elle bat] - [le nombre de choix qui la batte].
+	d'autre choix qu'il bat] - [le nombre de choix qui le battent].
 
 4 -  Si cette valeur  est strictement  négative, P ferme  la connexion
-	 avec tout les autres joueurs puis fini.
+	 avec tout les autres joueurs, puis fini.
 
 5 - Si cette valeur est positive  ou nulle, P continue le jeu avec les
 	autres joueurs ayant obtenu un score positif ou nul.
@@ -156,9 +154,9 @@ Client - Synonyme de joueur.
 3 - Fin
 -------
 
-1 -  À cet endroit  la, le joueur n'est  plus censé avoir  maintenu de
-	 connexion  avec   personne,  donc  est  libre   de  terminer  son
-	 éxecution.
+1 - À ce point de la partie, le joueur n'est plus censé avoir maintenu
+	de connexion avec  quiconque ; il est donc libre  de terminer son
+	exécution.
 
 Annexe
 ------
